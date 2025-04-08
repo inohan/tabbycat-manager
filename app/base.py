@@ -4,6 +4,7 @@ from functools import wraps
 import inspect
 from typing import Callable, TYPE_CHECKING
 import logging
+from .exceptions import ExpectedError
 if TYPE_CHECKING:
     from .app import TabbycatApp
 
@@ -34,14 +35,24 @@ def wait_finish(fn):
             e.control.update()
         try:
             return await fn(*args, **kwargs)
-        except Exception as err:
-            LOGGER.exception(err)
-            e.page.open(
-                ft.SnackBar(
-                    ft.Text(f"{type(err).__name__}: {err}", color=ft.Colors.BLACK),
-                    bgcolor=ft.Colors.RED_100,
+        except ExpectedError as err:
+            LOGGER.info("Expected error during button click", exc_info=err)
+            if e:
+                e.page.open(
+                    ft.SnackBar(
+                        ft.Text(err, color=ft.Colors.BLACK),
+                        bgcolor=ft.Colors.AMBER_100,
+                    )
                 )
-            )
+        except Exception as err:
+            LOGGER.error("Unexpected error during button click", exc_info=err)
+            if e:
+                e.page.open(
+                    ft.SnackBar(
+                        ft.Text(f"{type(err).__name__}: {err}", color=ft.Colors.BLACK),
+                        bgcolor=ft.Colors.RED_100,
+                    )
+                )
         finally:
             if e:
                 e.control.disabled = False
@@ -55,14 +66,24 @@ def wait_finish(fn):
             e.control.update()
         try:
             return fn(*args, **kwargs)
-        except Exception as err:
-            LOGGER.exception(err)
-            e.page.open(
-                ft.SnackBar(
-                    ft.Text(f"{type(err).__name__}: {err}", color=ft.Colors.BLACK),
-                    bgcolor=ft.Colors.RED_100,
+        except ExpectedError as err:
+            LOGGER.debug("Expected error during button click")
+            if e:
+                e.page.open(
+                    ft.SnackBar(
+                        ft.Text(err, color=ft.Colors.BLACK),
+                        bgcolor=ft.Colors.AMBER_100,
+                    )
                 )
-            )
+        except Exception as err:
+            LOGGER.error("Unexpected error during button click", exc_info=err)
+            if e:
+                e.page.open(
+                    ft.SnackBar(
+                        ft.Text(f"{type(err).__name__}: {err}", color=ft.Colors.BLACK),
+                        bgcolor=ft.Colors.RED_100,
+                    )
+                )
         finally:
             if e:
                 e.control.disabled = False

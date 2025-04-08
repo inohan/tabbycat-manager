@@ -5,8 +5,9 @@ import logging
 import tabbycat_api as tc
 from typing import Optional, override, Sequence
 
-from ..utils import Logo, LogoData
 from ..base import AppControl, try_string, wait_finish
+from ..exceptions import ExpectedError
+from ..utils import Logo, LogoData
 from .google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
 
 LOGGER = logging.getLogger(__name__)
@@ -214,8 +215,8 @@ class ParticipantLogoTile[T: tc.models.Team|tc.models.Adjudicator|tc.models.Spea
         
         @wait_finish
         def on_open_google_drive(e: ft.ControlEvent):
-            if not self.app.oauth_credentials:
-                raise Exception("Not logged in to Google Drive")
+            if not self.page.auth:
+                raise ExpectedError("Not logged in to Google")
             self.page.open(GoogleFilePicker(mime_type=["image/"], on_result=on_file_picked))
         
         def on_save(e: ft.ControlEvent):
@@ -350,8 +351,8 @@ class TeamLogoTile(ParticipantLogoTile[tc.models.Team]):
         
         @wait_finish
         def on_open_google_drive(e: ft.ControlEvent):
-            if not self.app.oauth_credentials:
-                raise Exception("Not logged in to Google Drive")
+            if not self.page.auth:
+                raise ExpectedError("Not logged in to Google")
             self.page.open(GoogleFilePicker(mime_type=["image/"], on_result=on_file_picked))
         
         def on_save(e: ft.ControlEvent):
@@ -563,8 +564,8 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
                         aliases[alias] = {"type": "file_id", "value": e.data.get("id")}
                         update_row_logos()
                     self.page.open(dlg)
-                if not self.app.oauth_credentials:
-                    raise Exception("Not logged in to Google Drive")
+                if not self.page.auth:
+                    raise ExpectedError("Not logged in to Google")
                 self.page.open(GoogleFilePicker(mime_type=["image/"], on_result=on_file_picked))
             img = LogoImageContainer(
                 {"type": "alias", "value": alias},
@@ -592,8 +593,8 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
 
         @wait_finish
         def add_alias(e: ft.ControlEvent):
-            if not self.app.oauth_credentials:
-                raise Exception("Not logged in to Google Drive")
+            if not self.page.auth:
+                raise ExpectedError("Not logged in to Google")
             service = build("drive", "v3", credentials=self.app.oauth_credentials)
             def on_file_picked(e: GoogleFilePickerResultEvent):
                 if e.data:

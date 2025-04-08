@@ -1,15 +1,17 @@
 import asyncio
 from typing import Literal, Optional
+from dataclasses import dataclass, field
 import flet as ft
 from googleapiclient.discovery import build
 import logging
 import re
+
 import tabbycat_api as tc
-from dataclasses import dataclass, field
-from ..google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
 from ...base import AppControl, wait_finish, try_string
+from ...exceptions import ExpectedError
 from ...utils import ordinal, SlideData, create_slides, reversor
 from ..editable_data_cell import EditableDataCell
+from ..google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
 
 LOGGER = logging.getLogger(__name__)
 
@@ -180,8 +182,8 @@ class SpeakerTab(ft.Tab, AppControl):
             mime_type=["application/vnd.google-apps.presentation"],
             on_result=future_file.set_result,
         )
-        if not self.app.oauth_credentials:
-            raise Exception("Not logged into Google.")
+        if not self.page.auth:
+            raise ExpectedError("Not logged in to Google")
         self.page.open(dlg_file)
         result: GoogleFilePickerResultEvent = await future_file
         if not result.data:
