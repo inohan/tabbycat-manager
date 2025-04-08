@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
-from typing import Any, Callable, Self, override
+from typing import Any, Callable, Self, override, Optional
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -22,6 +22,9 @@ def to_text[T](value: Callable[[], T]|T, nan: str = "-", error: str = "-") -> T:
             return error
     else:
         return value
+
+def to_bool(value: Any) -> Optional[bool]:
+    return value in ["TRUE", "True", "true", "T", "Yes", "yes", "Y", "y", 1, "1", True]
 
 def column_index_to_letter(index):
     letter = ""

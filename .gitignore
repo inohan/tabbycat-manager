@@ -15,3 +15,6 @@ wheels/
 # Flet
 assets/
 storage/
+
+# Bash script
+run.sh
