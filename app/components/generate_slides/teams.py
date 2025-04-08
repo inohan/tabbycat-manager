@@ -7,6 +7,7 @@ import re
 from typing import Literal, Optional
 import tabbycat_api as tc
 from ...base import AppControl, wait_finish, try_string
+from ...exceptions import ExpectedError
 from ...utils import ordinal, create_slides, reversor, SlideData
 from ..editable_data_cell import EditableDataCell
 from ..google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
@@ -213,8 +214,8 @@ class TeamTab(ft.Tab, AppControl):
             mime_type=["application/vnd.google-apps.presentation"],
             on_result=future_file.set_result,
         )
-        if not self.app.oauth_credentials:
-            raise Exception("Not logged into Google.")
+        if not self.page.auth:
+            raise ExpectedError("Not logged in to Google")
         self.page.open(dlg_file)
         result: GoogleFilePickerResultEvent = await future_file
         if not result.data:

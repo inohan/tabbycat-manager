@@ -189,7 +189,7 @@ class GoogleFilePicker(ft.AlertDialog, AppControl):
         self.__cache[file.get("id")] = file
     
     def set_credentials(self):
-        if self.app.oauth_credentials:
+        if self.page.auth:
             self.__service = build(
                 "drive",
                 "v3",

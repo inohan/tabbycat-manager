@@ -15,6 +15,7 @@ from typing import Literal, Optional, Awaitable, Callable
 
 import tabbycat_api as tc
 from .components import TabbycatAuthPagelet, MyAppBar, MyNavDrawer, TeamImporterPagelet, AdjudicatorImporterPagelet, RoundStatusPagelet, LogoManagerPagelet, SlideGeneratorPagelet
+from .exceptions import ExpectedError
 from .utils import MyGoogleOAuthProvider, LogoData
 
 LOGGER = logging.getLogger(__name__)
@@ -22,9 +23,9 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URL = os.getenv("GOOGLE_REDIRECT_URL")
 SECRET_KEY = os.getenv("SECRET_KEY")
-# assert GOOGLE_CLIENT_ID, "GOOGLE_CLIENT_ID is not set"
-# assert GOOGLE_CLIENT_SECRET, "GOOGLE_CLIENT_SECRET is not set"
-# assert SECRET_KEY, "SECRET_KEY is not set"
+assert GOOGLE_CLIENT_ID, "GOOGLE_CLIENT_ID is not set"
+assert GOOGLE_CLIENT_SECRET, "GOOGLE_CLIENT_SECRET is not set"
+assert SECRET_KEY, "SECRET_KEY is not set"
 
 @dataclass
 class AppPagelets:
@@ -170,22 +171,31 @@ class TabbycatApp:
     
     def on_route_change(self, e: ft.RouteChangeEvent):
         LOGGER.info(f"Route change: {e.route}")
-        if self.client is None:
-            self.page.go("/")
-        else:
-            if e.route == "/":
-                self.pagelets.switch_visibility("tabbycat_auth")
-            elif e.route == "/teams":
-                self.pagelets.switch_visibility("team_importer")
-            elif e.route == "/adjudicators":
-                self.pagelets.switch_visibility("adjudicator_importer")
-            elif e.route == "/rounds":
-                self.pagelets.switch_visibility("round_status")
-            elif e.route == "/logos":
-                self.pagelets.switch_visibility("logo_manager")
-            elif e.route == "/slides":
-                self.pagelets.switch_visibility("generate_slides")
+        if self.client is None and e.route != "/":
+            return self.page.go("/")
+        if e.route == "/":
+            self.set_title("Home")
+            self.pagelets.switch_visibility("tabbycat_auth")
+        elif e.route == "/teams":
+            self.set_title("Import Teams")
+            self.pagelets.switch_visibility("team_importer")
+        elif e.route == "/adjudicators":
+            self.set_title("Import Adjudicators")
+            self.pagelets.switch_visibility("adjudicator_importer")
+        elif e.route == "/rounds":
+            self.set_title("Round Status")
+            self.pagelets.switch_visibility("round_status")
+        elif e.route == "/logos":
+            self.set_title("Manage Logos")
+            self.pagelets.switch_visibility("logo_manager")
+        elif e.route == "/slides":
+            self.set_title("Generate Slides")
+            self.pagelets.switch_visibility("generate_slides")
         self.page.update()
+    
+    def set_title(self, title: str):
+        self.page.title = f"{title} - Tabbycat Manager"
+        self.page.appbar.title.value = f"{title} - Tabbycat Manager"
     
     async def on_error(self, e):
         LOGGER.exception(e.data)
@@ -246,8 +256,8 @@ class TabbycatApp:
                 raise ValueError("Either src or file_id must be provided, not both.")
             headers = None
             if file_id: # Google Drive
-                if self.page.auth is None:
-                    raise Exception("Not authenticated")
+                if not self.page.auth:
+                    raise ExpectedError("Not logged in to Google")
                 src = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
                 headers = {"Authorization": f"Bearer {self.page.auth.token.access_token}"}
             async def wrapper():

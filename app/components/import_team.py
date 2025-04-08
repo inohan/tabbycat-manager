@@ -1,16 +1,18 @@
+import asyncio
 import flet as ft
+from googleapiclient.discovery import build
 import logging
+import numpy as np
 import os
 import pandas as pd
 import re
-import numpy as np
 from typing import Any
+
 import tabbycat_api as tc
-import asyncio
 from ..sheet_reader import SheetReader, ExcelReader, CSVReader, to_text, to_snake_case
 from ..base import AppControl, wait_finish
+from ..exceptions import ExpectedError
 from .google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
-from googleapiclient.discovery import build
 
 FIELD_NAMES = ["institution", "break_categories", "reference", "short_reference", "use_institution_prefix", "speaker_1_name", "speaker_1_email", "speaker_1_categories", "speaker_2_name", "speaker_2_email", "speaker_2_categories", "speaker_3_name", "speaker_3_email", "speaker_3_categories"]
 LOGGER = logging.getLogger(__name__)
@@ -131,6 +133,8 @@ class TeamImporterPagelet(ft.Pagelet, AppControl):
     @wait_finish
     async def on_open_google_picker(self, e):
         future = asyncio.Future()
+        if not self.page.auth:
+            raise ExpectedError("Not logged in to Google")
         service = build("drive", "v3", credentials=self.app.oauth_credentials)
         gp = GoogleFilePicker(
             mime_type=["application/vnd.google-apps.spreadsheet", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"],

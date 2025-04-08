@@ -1,15 +1,16 @@
+import asyncio
 import flet as ft
+from googleapiclient.discovery import build
 import logging
+import numpy as np
 import os
 import pandas as pd
-import numpy as np
 from typing import Any
 import tabbycat_api as tc
-import asyncio
 from ..sheet_reader import SheetReader, ExcelReader, CSVReader, to_text
 from ..base import AppControl, wait_finish
+from ..exceptions import ExpectedError
 from .google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
-from googleapiclient.discovery import build
 
 FIELD_NAMES = ["name", "institution", "email", "base_score", "independent", "adj_core"]
 LOGGER = logging.getLogger(__name__)
@@ -124,8 +125,8 @@ class AdjudicatorImporterPagelet(ft.Pagelet, AppControl):
     @wait_finish
     async def on_open_google_picker(self, e):
         future = asyncio.Future()
-        if self.app.oauth_credentials is None:
-            raise Exception("Not logged in to Google. Please log in from top right corner.")
+        if not self.page.auth:
+            raise ExpectedError("Not logged in to Google.")
         service = build("drive", "v3", credentials=self.app.oauth_credentials)
         gp = GoogleFilePicker(
             mime_type=["application/vnd.google-apps.spreadsheet", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"],
@@ -137,7 +138,6 @@ class AdjudicatorImporterPagelet(ft.Pagelet, AppControl):
         )
         #await gp.load_path("root")
         result: GoogleFilePickerResultEvent = await future
-        LOGGER.info("Got result")
         if result.data is not None:
             if result.data.get("mimeType") == "application/vnd.google-apps.spreadsheet":
                 data: bytes = service.files().export(
