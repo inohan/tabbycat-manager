@@ -18,6 +18,8 @@ from .google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
 FIELD_NAMES = ["institution", "break_categories", "reference", "short_reference", "use_institution_prefix", "speaker_1_name", "speaker_1_email", "speaker_1_categories", "speaker_2_name", "speaker_2_email", "speaker_2_categories", "speaker_3_name", "speaker_3_email", "speaker_3_categories"]
 LOGGER = logging.getLogger(__name__)
 
+def notna(value: Any) -> bool:
+    return value is not None and value is not pd.NA and value is not np.nan
 class TeamImporterRow(ft.DataRow, AppControl):
     drow: pd.Series
     
@@ -42,11 +44,16 @@ class TeamImporterRow(ft.DataRow, AppControl):
             ft.DataCell(_get_content(col)) for col in self.drow.index
         ]
     
+    def build(self):
+        super().build()
+        if notna(self.drow.get("reference")) and notna(self.drow.get("institution")) and self.app.tournament._links.teams.find(
+            lambda team: team.reference == self.drow.get("reference") and team.institution and team.institution.code == self.drow.get("institution")
+        ):
+            self.selected = False
+    
     def get_object(self) -> Optional[tc.models.Team]:
         if not self.selected:
             return None
-        def notna(value: Any) -> bool:
-            return value is not None and value is not pd.NA and value is not np.nan
         def _value(col: Any) -> Any:
             value = self.drow.get(col, tc.NULL)
             return value if notna(value) else tc.NULL
@@ -409,8 +416,6 @@ class TeamImporterPagelet(ft.Pagelet, AppControl):
             self.app.update_speaker_categories()
         )
         # Create teams
-        for row in selected_rows:
-            LOGGER.info(row.get_object().to_json())
         tasks = {
             get_name(row.drow): asyncio.create_task(self.app.tournament.create(obj)) for row in selected_rows
             if (obj := row.get_object()) is not None
@@ -425,6 +430,10 @@ class TeamImporterPagelet(ft.Pagelet, AppControl):
                 has_exceptions = True
             else:
                 results.append(f"Created team \"{name}\" successfully")
+        await asyncio.gather(
+            self.app.update_teams(),
+            self.app.update_speakers()
+        )
         self.page.open(
             ft.SnackBar(
                 ft.Text("\n".join(results), color=ft.Colors.BLACK),
