@@ -15,9 +15,10 @@ def main(page: ft.Page):
 
 def set_logging(default_level=logging.INFO):
     if os.path.exists(os.getenv("LOGGING_CONFIG", "logging.json")):
-        logging.config.dictConfig(
-            json.load(open(os.getenv("LOGGING_CONFIG", "logging.json")))
-        )
+        with open(os.getenv("LOGGING_CONFIG", "logging.json")) as f:
+            logging.config.dictConfig(
+                json.load(f)
+            )
     else:
         logging.basicConfig(level=default_level)
 
