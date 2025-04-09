@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 from flet.auth import OAuthProvider
 from typing import TypedDict, Literal, Optional, Iterable, Callable, Any
 import tabbycat_api as tc
@@ -41,9 +42,14 @@ class LogoData:
     
     @classmethod
     def default(cls) -> "LogoData":
+        with open("data/assets.json", "r") as f:
+            assets: dict = json.load(f)
         return cls(
-            aliases = { #TODO: Add aliases
-                
+            aliases = {
+                key: {
+                    "type": "file_id",
+                    "value": value
+                } for key, value in assets.items()
             },
             mappings = {}
         )
