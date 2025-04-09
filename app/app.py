@@ -92,12 +92,32 @@ class TabbycatApp:
         self.page.data = {"app": self}
         self.page.appbar = MyAppBar(self.on_click_login, on_click_logout=self.on_click_logout)
         self.page.drawer = MyNavDrawer()
-        #self.page.on_error = self.on_error
         self.page.on_login = self.on_login
         self.page.on_logout = self.on_logout
         self.page.on_route_change = self.on_route_change
         self.page.controls = self.pagelets.get_all_pagelets()
         self.page.go("/")
+        self.try_init_login()
+    
+    def try_init_login(self):
+        ejt = self.page.client_storage.get("auth_token")
+        if not ejt:
+            return
+        LOGGER.info("Found auth token in client storage, trying to log in")
+        try:
+            jt = decrypt(ejt, SECRET_KEY)
+            self.page.login(
+                provider=self.provider,
+                saved_token=jt,
+                on_open_authorization_url=lambda url: self.page.launch_url(url, web_window_name="_blank"),
+                scope=[
+                    "https://www.googleapis.com/auth/userinfo.email",
+                    "https://www.googleapis.com/auth/userinfo.profile",
+                    "https://www.googleapis.com/auth/drive"
+                ]
+            )
+        except Exception as e:
+            LOGGER.warning("Error while logging in", exc_info=e)
     
     def on_click_login(self, e):
         ejt = self.page.client_storage.get("auth_token")
@@ -115,8 +135,8 @@ class TabbycatApp:
                     "https://www.googleapis.com/auth/drive"
                 ]
             )
-        except Exception:
-            LOGGER.warning("An error occurred while logging in, deleting auth token")
+        except Exception as e:
+            LOGGER.warning("Error while logging in, deleting auth token", exc_info=e)
             self.page.client_storage.remove("auth_token")
     
     def on_click_logout(self, e):
