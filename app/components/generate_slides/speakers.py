@@ -192,7 +192,7 @@ class SpeakerTab(ft.Tab, AppControl):
         future_slide_prompt = asyncio.Future()
         service = build("slides", "v1", credentials=self.app.oauth_credentials)
         presentation = service.presentations().get(presentationId=result.data.get("id")).execute()
-        num_institutions: set[int] = {0}.union({len(self.app.logos.get_object_logo_urls(row.speaker_data.speaker)) for row in self.data_table.rows})
+        num_institutions: set[int] = {0}.union({len(self.app.logos.get_object_logo_urls(row.speaker_data.speaker)) for row in self.data_table.rows if row.speaker_data.speaker})
         fields_slide_inst = {
             num_inst: ft.TextField(
                 label=f"Slide for {num_inst} institutions",
