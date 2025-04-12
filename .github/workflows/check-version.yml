@@ -5,6 +5,9 @@ on:
         branches:
             - main
 
+permissions:
+    contents: write # Allow the workflow to push changes to the repository
+
 jobs:
     bump-version:
         runs-on: ubuntu-latest
