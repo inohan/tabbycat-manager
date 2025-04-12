@@ -1,27 +1,75 @@
-name: Check Version Bump
+name: Bump Micro Version
 
 on:
-    pull_request:
+    push:
         branches:
             - main
 
 jobs:
-    check-version:
+    bump-version:
         runs-on: ubuntu-latest
+
         steps:
-            - name: Checkout PR branch
+            - name: Checkout current branch
               uses: actions/checkout@v4
               with:
-                  fetch-depth: 0
+                  fetch-depth: 0 # Fetch full history so we can compare branches
 
-            - name: Check for pyproject.toml version bump
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Get current version from pyproject.toml
+              id: current
               run: |
-                  set -e
-                  BASE_BRANCH="origin/main"
-                  git fetch origin main
-                  if git diff $BASE_BRANCH...HEAD -- pyproject.toml | grep '^+version\s*=' > /dev/null; then
-                    echo "✅ Version updated in pyproject.toml"
-                  else
-                    echo "❌ Version NOT updated in pyproject.toml. Please increment the version."
-                    exit 1
-                  fi
+                  CURRENT_VERSION=$(grep -E '^version *= *"' pyproject.toml | sed -E 's/version *= *"(.*)"/\1/')
+                  echo "Current version: $CURRENT_VERSION"
+                  echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Fetch main branch
+              run: git fetch origin main
+
+            - name: Get main branch version
+              id: main
+              run: |
+                  git show origin/main:pyproject.toml > main_pyproject.toml
+                  MAIN_VERSION=$(grep -E '^version *= *"' main_pyproject.toml | sed -E 's/version *= *"(.*)"/\1/')
+                  echo "Main version: $MAIN_VERSION"
+                  echo "main_version=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Compare versions and update if needed
+              id: bump
+              run: |
+                  pip install packaging
+                  python -c "
+                  import re
+                  from packaging.version import Version
+
+                  with open('pyproject.toml') as f:
+                      content = f.read()
+
+                  current = Version('${{ steps.current.outputs.current_version }}')
+                  main = Version('${{ steps.main.outputs.main_version }}')
+
+                  if current <= main:
+                      new_version = f'{main.major}.{main.minor}.{main.micro + 1}'
+                      print(f'Bumping version to {new_version}')
+                      updated = re.sub(r'version *= *\"[^\"]+\"', f'version = \"{new_version}\"', content)
+                      with open('pyproject.toml', 'w') as f:
+                          f.write(updated)
+                      with open('version.txt', 'w') as f:
+                          f.write(new_version)
+                  else:
+                      print('No version bump needed.')
+                  "
+
+            - name: Commit and push changes
+              if: success() && steps.bump.outcome == 'success' && hashFiles('version.txt') != ''
+              run: |
+                  NEW_VERSION=$(cat version.txt)
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@users.noreply.github.com"
+                  git add pyproject.toml
+                  git commit -m "chore: bump version to $NEW_VERSION"
+                  git push
