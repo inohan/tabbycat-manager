@@ -1,0 +1,27 @@
+name: Check Version Bump
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    check-version:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout PR branch
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Check for pyproject.toml version bump
+              run: |
+                  set -e
+                  BASE_BRANCH="origin/main"
+                  git fetch origin main
+                  if git diff $BASE_BRANCH...HEAD -- pyproject.toml | grep '^+version\s*=' > /dev/null; then
+                    echo "✅ Version updated in pyproject.toml"
+                  else
+                    echo "❌ Version NOT updated in pyproject.toml. Please increment the version."
+                    exit 1
+                  fi
