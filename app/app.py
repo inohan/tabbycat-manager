@@ -346,6 +346,7 @@ class TabbycatApp:
         self.pagelets.pg_logo_manager.set_tabbycat()
         self.pagelets.pg_generate_slides.set_tabbycat()
         self.page.drawer.update()
+        self.page.run_task(self.pagelets.pg_round_status.set_tabbycat)
     
     async def run_task[T](self, key: str, coro: Awaitable, rerun: bool = True, *, args = None, kwargs = None) -> T:
         """Runs a task and returns the result. Prevents multiple tasks from running at the same time.

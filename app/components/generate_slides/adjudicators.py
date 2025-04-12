@@ -96,6 +96,11 @@ class AdjudicatorTab(ft.Tab, AppControl):
                                 on_click=self.on_change_title
                             ),
                             ft.ElevatedButton(
+                                text="Copy Breaking",
+                                icon=ft.Icons.CONTENT_COPY,
+                                on_click=self.on_copy_breaking
+                            ),
+                            ft.ElevatedButton(
                                 text="Generate",
                                 icon=ft.Icons.AUTO_AWESOME_MOTION,
                                 on_click=self.on_generate
@@ -174,6 +179,22 @@ class AdjudicatorTab(ft.Tab, AppControl):
             ]
         )
         self.page.open(dlg)
+    
+    @wait_finish
+    def on_copy_breaking(self, e: ft.ControlEvent):
+        rows: list[AdjudicatorDataRow] = self.data_table.rows
+        breaking = [row.adjudicator_data.adjudicator for row in rows if row.adjudicator_data.adjudicator.breaking]
+        self.page.set_clipboard(
+            "\n".join(sorted(
+                [adj.name for adj in breaking]
+            ))
+        )
+        self.page.open(
+            ft.SnackBar(
+                ft.Text(f"Copied {len(breaking)} breaking adjudicators to clipboard", color=ft.Colors.BLACK),
+                bgcolor=ft.Colors.GREEN_100
+            )
+        )
     
     @wait_finish
     def on_change_calculation(self, e: ft.ControlEvent):

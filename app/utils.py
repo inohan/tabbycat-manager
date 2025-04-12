@@ -40,10 +40,6 @@ class Logo(TypedDict):
     type: Literal["alias", "url", "file_id"]
     value: str
 
-# class LogoInfo(TypedDict):
-#     aliases: dict[str, LogoAlias]
-#     mappings: dict[str, Optional[list[Logo]]]
-
 @dataclass
 class LogoData:
     aliases: dict[str, LogoAlias]
