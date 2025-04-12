@@ -244,7 +244,7 @@ class GoogleFilePicker(ft.AlertDialog, AppControl):
                 data=file,
                 on_long_press=self._on_select,
                 on_click=self._on_single_select,
-                col=3
+                col={"xs": 6, "sm": 4, "md": 3}
             )
         self.list_view.controls.clear()
         if len(files):

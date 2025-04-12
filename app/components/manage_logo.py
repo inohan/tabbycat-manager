@@ -484,9 +484,10 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
         self.update()
     
     def set_list_participants(self):
-        self.row_teams.controls = sorted([TeamLogoTile(team, col=3) for team in self.app.tournament._links.teams], key=lambda x: x.title_name)
-        self.row_speakers.controls = sorted([ParticipantLogoTile(speaker, col=3) for speaker in self.app.tournament._links.speakers], key=lambda x: x.title_name)
-        self.row_adjudicators.controls = sorted([ParticipantLogoTile(adjudicator, col=3) for adjudicator in self.app.tournament._links.adjudicators], key=lambda x: x.title_name)
+        col_size = {"xs": 6, "sm": 4, "md": 3}
+        self.row_teams.controls = sorted([TeamLogoTile(team, col=col_size) for team in self.app.tournament._links.teams], key=lambda x: x.title_name)
+        self.row_speakers.controls = sorted([ParticipantLogoTile(speaker, col=col_size) for speaker in self.app.tournament._links.speakers], key=lambda x: x.title_name)
+        self.row_adjudicators.controls = sorted([ParticipantLogoTile(adjudicator, col=col_size) for adjudicator in self.app.tournament._links.adjudicators], key=lambda x: x.title_name)
     
     @wait_finish
     async def load_logos(self, e: ft.ControlEvent):
