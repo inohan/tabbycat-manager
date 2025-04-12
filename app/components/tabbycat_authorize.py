@@ -102,6 +102,7 @@ class LoginCard(ft.Card, AppControl):
             ]
             self.dropdown_slug.value = self.dropdown_slug.options[0].key
             self.col_select_tournament.visible = True
+            @wait_finish
             async def on_login(e):
                 tournament = tournaments.find(slug=self.dropdown_slug.value)
                 # Cache entry
