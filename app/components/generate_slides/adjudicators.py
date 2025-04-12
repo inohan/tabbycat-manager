@@ -133,6 +133,7 @@ class AdjudicatorTab(ft.Tab, AppControl):
     
     @wait_finish
     async def on_reload(self, e: ft.ControlEvent):
+        await self.app.tournament._links.adjudicators.load(force=True)
         await self.app.update_feedback()
         self.calculate()
         self.calculate_title()

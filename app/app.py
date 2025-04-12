@@ -16,7 +16,7 @@ from typing import Literal, Optional, Awaitable, Callable
 import tabbycat_api as tc
 from .components import TabbycatAuthPagelet, MyAppBar, MyNavDrawer, TeamImporterPagelet, AdjudicatorImporterPagelet, RoundStatusPagelet, LogoManagerPagelet, SlideGeneratorPagelet
 from .exceptions import ExpectedError
-from .utils import MyGoogleOAuthProvider, LogoData
+from .utils import MyGoogleOAuthProvider, LogoData, get_version
 
 LOGGER = logging.getLogger(__name__)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -98,6 +98,7 @@ class TabbycatApp:
         self.page.controls = self.pagelets.get_all_pagelets()
         self.page.go("/")
         self.try_init_login()
+        self.version_check()
     
     def try_init_login(self):
         ejt = self.page.client_storage.get("auth_token")
@@ -118,6 +119,23 @@ class TabbycatApp:
             )
         except Exception as e:
             LOGGER.warning("Error while logging in", exc_info=e)
+    
+    def version_check(self):
+        try:
+            previous_version = self.page.client_storage.get("version")
+            current_version = get_version()
+            if previous_version is None:
+                LOGGER.info("No previous version found")
+            elif previous_version != current_version:
+                LOGGER.info(f"Version changed from {previous_version} to {current_version}")
+                # TODO: Add cache clearing logic if destructive changes are made
+            else:
+                LOGGER.info(f"Version is the same: {current_version}")
+            self.page.client_storage.set("version", current_version)
+        except Exception as e:
+            LOGGER.warning("Error while checking version", exc_info=e)
+        finally:
+            self.page.client_storage.set("version", get_version())
     
     def on_click_login(self, e):
         ejt = self.page.client_storage.get("auth_token")

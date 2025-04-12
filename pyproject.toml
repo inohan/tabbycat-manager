@@ -1,6 +1,6 @@
 [project]
 name = "tabbycat-manager2"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tool for making tabbing easier"
 readme = "README.md"
 requires-python = ">=3.13"
