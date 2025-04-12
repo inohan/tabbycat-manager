@@ -122,11 +122,24 @@ class ParticipantLogoTile[T: tc.models.Team|tc.models.Adjudicator|tc.models.Spea
             scroll=ft.ScrollMode.AUTO,
         )
         super().__init__(
-            title=ft.Text(try_string(lambda: (participant.long_name if isinstance(participant, tc.models.Team) else participant.name))),
+            title=ft.Text(self.title_name),
             subtitle=self.row_logos,
             col=col,
             on_click=self.on_tile_click,
         )
+    
+    @property
+    def title_name(self) -> str:
+        title = ""
+        if isinstance(self.participant, tc.models.Team):
+            title =  try_string(lambda: self.participant.long_name)
+        elif isinstance(self.participant, tc.models.Adjudicator):
+            title = try_string(lambda: self.participant.name)
+        elif isinstance(self.participant, tc.models.Speaker):
+            title = try_string(lambda: self.participant.name)
+            if self.participant.team:
+                title += f" ({try_string(lambda: self.participant.team.long_name)})"
+        return title
     
     def build(self):
         super().build()
@@ -405,11 +418,11 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
     def __init__(self):
         self.row_teams = ft.ResponsiveRow(
             [],
-            expand=True
+            expand=True,
         )
         self.row_speakers = ft.ResponsiveRow(
             [],
-            expand=True
+            expand=True,
         )
         self.row_adjudicators = ft.ResponsiveRow(
             [],
@@ -444,11 +457,13 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
                     ),
                     ft.Column(
                         [
-                            ft.Text("Speakers"),
+                            ft.Text("Speakers", size=20, weight=ft.FontWeight.BOLD),
                             self.row_speakers,
-                            ft.Text("Adjudicators"),
+                            ft.Divider(),
+                            ft.Text("Adjudicators", size=20, weight=ft.FontWeight.BOLD),
                             self.row_adjudicators,
-                            ft.Text("Teams"),
+                            ft.Divider(),
+                            ft.Text("Teams", size=20, weight=ft.FontWeight.BOLD),
                             self.row_teams,
                         ],
                         expand=True,
@@ -465,9 +480,9 @@ class LogoManagerPagelet(ft.Pagelet, AppControl):
         self.update()
     
     def set_list_participants(self):
-        self.row_teams.controls = [TeamLogoTile(team, col=3) for team in self.app.tournament._links.teams]
-        self.row_speakers.controls = [ParticipantLogoTile(speaker, col=3) for speaker in self.app.tournament._links.speakers]
-        self.row_adjudicators.controls = [ParticipantLogoTile(adjudicator, col=3) for adjudicator in self.app.tournament._links.adjudicators]
+        self.row_teams.controls = sorted([TeamLogoTile(team, col=3) for team in self.app.tournament._links.teams], key=lambda x: x.title_name)
+        self.row_speakers.controls = sorted([ParticipantLogoTile(speaker, col=3) for speaker in self.app.tournament._links.speakers], key=lambda x: x.title_name)
+        self.row_adjudicators.controls = sorted([ParticipantLogoTile(adjudicator, col=3) for adjudicator in self.app.tournament._links.adjudicators], key=lambda x: x.title_name)
     
     @wait_finish
     async def load_logos(self, e: ft.ControlEvent):
