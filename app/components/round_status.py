@@ -541,15 +541,16 @@ class RoundStatusPagelet(ft.Pagelet, AppControl):
             expand=True
         )
     
-    async def set_tabs(self):
-        # Load all pairings
+    async def set_tabbycat(self):
         await asyncio.gather(
-            *[round._links.pairing.load() for round in self.app.tournament._links.rounds]
+            *[round._links.pairing.load() for round in self.app.tournament._links.rounds],
         )
-        # Load all ballots
         await asyncio.gather(
             *[pairing._links.ballots.load() for round in self.app.tournament._links.rounds for pairing in round._links.pairing]
         )
+        self.set_tabs()
+    
+    def set_tabs(self):
         tabs = [
             RoundStatusTab(round) for round in self.app.tournament._links.rounds
         ]
@@ -560,4 +561,13 @@ class RoundStatusPagelet(ft.Pagelet, AppControl):
     
     @wait_finish
     async def on_btn_update(self, e):
-        await self.set_tabs()
+        # Load all pairings
+        await asyncio.gather(
+            self.app.tournament._links.feedback.load(force=True),
+            *[round._links.pairing.load(force=True) for round in self.app.tournament._links.rounds]
+        )
+        # Load all ballots
+        await asyncio.gather(
+            *[pairing._links.ballots.load(force=True) for round in self.app.tournament._links.rounds for pairing in round._links.pairing]
+        )
+        self.set_tabs()

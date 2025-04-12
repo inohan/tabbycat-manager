@@ -200,7 +200,9 @@ class ParticipantLogoTile[T: tc.models.Team|tc.models.Adjudicator|tc.models.Spea
                     text=alias
                 ) for alias in sorted(self.app.logos.gather_aliases())
             ],
+            editable=True,
             enable_filter=True,
+            enable_search=True,
         )
         
         def on_add_alias(e: ft.ControlEvent):
@@ -336,7 +338,9 @@ class TeamLogoTile(ParticipantLogoTile[tc.models.Team]):
                     text=alias
                 ) for alias in sorted(self.app.logos.gather_aliases())
             ],
+            editable=True,
             enable_filter=True,
+            enable_search=True,
         )
         
         def on_add_alias(e: ft.ControlEvent):
