@@ -3,7 +3,16 @@ import json
 from flet.auth import OAuthProvider
 from typing import TypedDict, Literal, Optional, Iterable, Callable, Any
 import tabbycat_api as tc
+import tomllib
 import uuid
+
+def get_version(path = "pyproject.toml") -> Optional[str]:
+    """Get the version of the app"""
+    try:
+        with open(path, "rb") as f:
+            return tomllib.load(f)["project"]["version"]
+    except FileNotFoundError:
+        return None
 
 class MyGoogleOAuthProvider(OAuthProvider):
     """Custom Google OAuth provider which returns refresh token"""
