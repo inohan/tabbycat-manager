@@ -18,10 +18,16 @@ jobs:
               with:
                   fetch-depth: 0 # Fetch full history so we can compare branches
 
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
+
             - name: Set up Python
               uses: actions/setup-python@v5
               with:
-                  python-version: "3.11"
+                  python-version-file: ".python-version"
+
+            - name: Create requirements.txt
+              run: pip freeze > requirements.txt
 
             - name: Get current version from pyproject.toml
               id: current
@@ -67,12 +73,15 @@ jobs:
                       print('No version bump needed.')
                   "
 
+            - name: Lock uv
+              run: uv lock
+
             - name: Commit and push changes
               if: success() && steps.bump.outcome == 'success' && hashFiles('version.txt') != ''
               run: |
                   NEW_VERSION=$(cat version.txt)
                   git config user.name "github-actions"
                   git config user.email "github-actions@users.noreply.github.com"
-                  git add pyproject.toml
+                  git add pyproject.toml uv.lock requirements.txt
                   git commit -m "chore: bump version to $NEW_VERSION"
                   git push
