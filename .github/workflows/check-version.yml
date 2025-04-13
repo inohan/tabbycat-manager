@@ -30,9 +30,7 @@ jobs:
                   python-version-file: ".python-version"
 
             - name: Create requirements.txt
-              run: |
-                  uv sync
-                  uv pip freeze > requirements.txt
+              run: uv pip compile pyproject.toml > requirements.txt
 
             - name: Get current version from pyproject.toml
               id: current
