@@ -13,7 +13,7 @@ class LoginCard(ft.Card, AppControl):
             label="History",
             value="null",
             expand=True,
-            width=500
+            width=800
         )
         self.input_url = ft.TextField(
             label="URL",
@@ -102,6 +102,7 @@ class LoginCard(ft.Card, AppControl):
             ]
             self.dropdown_slug.value = self.dropdown_slug.options[0].key
             self.col_select_tournament.visible = True
+            @wait_finish
             async def on_login(e):
                 tournament = tournaments.find(slug=self.dropdown_slug.value)
                 # Cache entry
@@ -152,8 +153,8 @@ class TabbycatAuthPagelet(ft.Pagelet):
     
     def __init__(self):
         super().__init__(
-            ft.Container(
-                LoginCard(),
-                alignment=ft.alignment.center
-            )
+            ft.Column(
+                controls=[LoginCard()]
+            ),
+            expand=True
         )

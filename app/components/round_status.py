@@ -161,7 +161,7 @@ class TeamContainer(ft.Container, AppControl):
                 ),
                 horizontal_spacing=40
             ),
-            col=6,
+            col={"xs": 12, "sm": 6},
             border=ft.border.all(1, ft.Colors.GREY_400)
         )
 
