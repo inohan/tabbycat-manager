@@ -14,7 +14,7 @@ import os
 from typing import Literal, Optional, Awaitable, Callable
 
 import tabbycat_api as tc
-from .components import TabbycatAuthPagelet, MyAppBar, MyNavDrawer, TeamImporterPagelet, AdjudicatorImporterPagelet, RoundStatusPagelet, LogoManagerPagelet, SlideGeneratorPagelet
+from .components import TabbycatAuthPagelet, MyAppBar, MyBottomAppBar, MyNavDrawer, TeamImporterPagelet, AdjudicatorImporterPagelet, RoundStatusPagelet, LogoManagerPagelet, SlideGeneratorPagelet
 from .exceptions import ExpectedError
 from .utils import MyGoogleOAuthProvider, LogoData, get_version
 
@@ -92,6 +92,7 @@ class TabbycatApp:
         self.page.data = {"app": self}
         self.page.appbar = MyAppBar(self.on_click_login, on_click_logout=self.on_click_logout)
         self.page.drawer = MyNavDrawer()
+        self.page.bottom_appbar = MyBottomAppBar()
         self.page.on_login = self.on_login
         self.page.on_logout = self.on_logout
         self.page.on_route_change = self.on_route_change
