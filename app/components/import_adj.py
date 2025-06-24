@@ -66,7 +66,7 @@ class AdjudicatorImporterRow(ft.DataRow, AppControl):
             name=_value("name"),
             institution=self.app.institutions.find(code=inst) if (inst:=_value("institution")) is not tc.NULL else None,
             email=_value("email"),
-            base_score=_value("base_score"),
+            base_score=v if ((v:=_value("base_score")) is not tc.NULL and not np.isnan(v)) else tc.NULL,
             independent=to_bool(v) if (v:=_value("independent")) is not tc.NULL else tc.NULL,
             adj_core=to_bool(v) if (v:=_value("adj_core")) is not tc.NULL else tc.NULL,
             institution_conflicts=[],
@@ -244,6 +244,8 @@ class AdjudicatorImporterPagelet(ft.Pagelet, AppControl):
             self.data_table.rows.clear()
             return
         LOGGER.info("Loading adjudicator data")
+        if "base_score" in self.reader.data.columns:
+            self.reader.data["base_score"].astype(float)
         # Set data table
         self.data_table.columns = [
             ft.DataColumn(
