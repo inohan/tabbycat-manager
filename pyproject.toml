@@ -13,11 +13,11 @@ dependencies = [
     "tabbycat-api-2",
 ]
 
-[tool.uv.sources]
-tabbycat-api-2 = { git = "https://github.com/inohan/tabbycat-api-2.git" }
-
 [tool.flet]
 org = "inohaan"
 product = "TabbycatManager"
 
 [tool.flet.app]
+
+[tool.uv.sources]
+tabbycat-api-2 = { git = "https://github.com/inohan/tabbycat-api-2.git" }
