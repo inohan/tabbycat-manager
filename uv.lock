@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.13"
 
 [[package]]
@@ -871,7 +870,7 @@ wheels = [
 [[package]]
 name = "tabbycat-api-2"
 version = "0.0.1"
-source = { git = "https://github.com/inohan/tabbycat-api-2.git#bd36ac152fc0cb3a1a429ea9a8cc00ed84cc459c" }
+source = { git = "https://github.com/inohan/tabbycat-api-2.git#b0d18319f7b8dbe1e46b19f48da705f1c33c7009" }
 dependencies = [
     { name = "httpx" },
 ]

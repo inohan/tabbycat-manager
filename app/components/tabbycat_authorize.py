@@ -61,7 +61,7 @@ class LoginCard(ft.Card, AppControl):
                     ],
                 ),
                 margin=40
-            ),
+            )
         )
     
     def did_mount(self):
@@ -154,7 +154,8 @@ class TabbycatAuthPagelet(ft.Pagelet):
     def __init__(self):
         super().__init__(
             ft.Column(
-                controls=[LoginCard()]
+                controls=[LoginCard()],
+                scroll=ft.ScrollMode.AUTO,
             ),
             expand=True
         )

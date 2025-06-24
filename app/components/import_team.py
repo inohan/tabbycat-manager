@@ -57,7 +57,6 @@ class TeamImporterRow(ft.DataRow, AppControl):
         def _value(col: Any) -> Any:
             value = self.drow.get(col, tc.NULL)
             return value if notna(value) else tc.NULL
-        valid_speakers: set[int] = set()
         speakers: list[tc.models.Speaker] = []
         for i in range(1, 10):
             if any(
@@ -65,8 +64,7 @@ class TeamImporterRow(ft.DataRow, AppControl):
                     notna(self.drow.get(col, None))
                     for col in {f"speaker_{i}_name", f"speaker_{i}_email", f"speaker_{i}_categories"}
                 )
-            ):
-                valid_speakers.add(i)
+            ) and _value(f"speaker_{i}_name"):
                 speakers.append(
                     tc.models.Speaker(
                         name=_value(f"speaker_{i}_name"),
@@ -378,7 +376,10 @@ class TeamImporterPagelet(ft.Pagelet, AppControl):
                         tc.models.BreakCategory(
                             name=bc,
                             slug=to_snake_case(bc),
-                            seq=next(bc_seq)
+                            seq=next(bc_seq),
+                            break_size=4,
+                            is_general=False,
+                            priority=1
                         )
                     )
                 ) for bc in missing_break_categories
