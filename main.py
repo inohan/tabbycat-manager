@@ -32,3 +32,4 @@ if __name__ == "__main__":
         assets_dir="assets",
         upload_dir="assets/uploads",
     )
+    
