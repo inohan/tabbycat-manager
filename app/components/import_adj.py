@@ -246,6 +246,8 @@ class AdjudicatorImporterPagelet(ft.Pagelet, AppControl):
         LOGGER.info("Loading adjudicator data")
         if "base_score" in self.reader.data.columns:
             self.reader.data["base_score"].astype(float)
+        for col in self.reader.data.columns:
+            self.reader.data[col] = self.reader.data[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
         # Set data table
         self.data_table.columns = [
             ft.DataColumn(

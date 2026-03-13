@@ -1,5 +1,5 @@
 import asyncio
-from typing import Literal, Optional
+from typing import Literal
 from dataclasses import dataclass, field
 import flet as ft
 from googleapiclient.discovery import build

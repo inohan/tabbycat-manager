@@ -4,7 +4,6 @@ import flet as ft
 from googleapiclient.discovery import build
 import logging
 import re
-from typing import Literal, Optional
 
 import tabbycat_api as tc
 from ...base import AppControl, wait_finish, try_string

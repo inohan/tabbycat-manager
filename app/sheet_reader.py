@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
-from typing import Any, Callable, Self, override, Optional
+from typing import Any, Callable, override, Optional
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
