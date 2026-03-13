@@ -1,17 +1,15 @@
 import asyncio
 import base64
-from collections import defaultdict
 from dataclasses import dataclass, fields
 from datetime import datetime
 import flet as ft
-from flet.auth import OAuthProvider
 from flet.security import encrypt, decrypt
 from functools import cache
 from google.oauth2.credentials import Credentials
 import httpx
 import logging
 import os
-from typing import Literal, Optional, Awaitable, Callable
+from typing import Literal, Optional, Awaitable
 
 import tabbycat_api as tc
 from .components import TabbycatAuthPagelet, MyAppBar, MyBottomAppBar, MyNavDrawer, TeamImporterPagelet, AdjudicatorImporterPagelet, RoundStatusPagelet, LogoManagerPagelet, SlideGeneratorPagelet
@@ -312,7 +310,7 @@ class TabbycatApp:
                 self.__cached_images[src] = asyncio.create_task(wrapper())
             # Wait for the task to complete
             return await self.__cached_images[src]
-        except Exception as e:
+        except Exception:
             return None
     
     @cache

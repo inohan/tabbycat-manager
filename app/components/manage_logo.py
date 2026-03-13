@@ -7,7 +7,7 @@ from typing import Optional, override, Sequence
 
 from ..base import AppControl, try_string, wait_finish
 from ..exceptions import ExpectedError
-from ..utils import Logo, LogoData
+from ..utils import Logo
 from .google_picker import GoogleFilePicker, GoogleFilePickerResultEvent
 
 LOGGER = logging.getLogger(__name__)

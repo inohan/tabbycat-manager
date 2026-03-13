@@ -1,4 +1,4 @@
-from typing import Any, Optional, Literal
+from typing import Optional
 import flet as ft
 import tabbycat_api as tc
 import logging
@@ -6,7 +6,7 @@ import logging
 from .teams import TeamTab, TeamMetrics
 from .speakers import SpeakerTab, SpeakerMetrics
 from .adjudicators import AdjudicatorTab
-from ...base import AppControl, wait_finish, try_string
+from ...base import AppControl, wait_finish
 
 LOGGER = logging.getLogger(__name__)
 

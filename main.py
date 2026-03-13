@@ -2,7 +2,6 @@ import logging.config
 import flet as ft
 import json
 import os
-import sys
 import tabbycat_api as tc
 from dotenv import load_dotenv
 import logging

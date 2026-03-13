@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 import flet as ft
 import logging
 from ..base import AppControl
